@@ -1,0 +1,72 @@
+name: "🏅 Badge Submission"
+description: "Submit your completed Main Task to earn the Kubernetes-101 completion badge."
+title: "[Submission] ${{ github.actor }}"
+labels: ["submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🏅 Kubernetes-101 Badge Submission
+
+        Before submitting, make sure you have:
+        - ✅ Completed the **Main Task** (Deploy the Sample App)
+        - ✅ Added your screenshots to `submissions/<your-username>/`
+        - ✅ Opened a **Pull Request** targeting **`nisalgunawardhana/Kubernetes-101` → `main`**
+        - ✅ Copied your **PR link**
+
+        Read the full [Submission Guidelines](https://github.com/nisalgunawardhana/Kubernetes-101/blob/main/SUBMISSION.md) if unsure.
+
+  - type: input
+    id: full_name
+    attributes:
+      label: Full Name
+      description: Your full name (as you'd like it on your badge record).
+      placeholder: "Jane Doe"
+    validations:
+      required: true
+
+  - type: input
+    id: github_username
+    attributes:
+      label: GitHub Username
+      description: Your GitHub username (without the @).
+      placeholder: "janedoe"
+    validations:
+      required: true
+
+  - type: input
+    id: pr_link
+    attributes:
+      label: Pull Request Link
+      description: "The full URL to your submission PR (must target nisalgunawardhana/Kubernetes-101 main branch)."
+      placeholder: "https://github.com/nisalgunawardhana/Kubernetes-101/pull/123"
+    validations:
+      required: true
+
+  - type: input
+    id: email
+    attributes:
+      label: Email Address
+      description: We'll use this to contact you about your submission.
+      placeholder: "jane@example.com"
+    validations:
+      required: true
+
+  - type: input
+    id: university
+    attributes:
+      label: University
+      description: Your university / institution name.
+      placeholder: "University of Example"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Confirmation
+      options:
+        - label: I have completed the Main Task and added my screenshots to `submissions/<my-username>/`.
+          required: true
+        - label: My Pull Request targets the course repo's `main` branch (not my own fork's main).
+          required: true

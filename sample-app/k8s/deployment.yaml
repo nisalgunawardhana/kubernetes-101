@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s101-app
+  labels:
+    app: k8s101-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: k8s101-app
+  template:
+    metadata:
+      labels:
+        app: k8s101-app
+    spec:
+      containers:
+      - name: k8s101-app
+        image: k8s101-app:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - configMapRef:
+            name: k8s101-config
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 5

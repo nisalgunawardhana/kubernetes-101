@@ -1,0 +1,151 @@
+name: Validate Submission
+
+on:
+  issues:
+    types: [opened, edited, reopened]
+
+permissions:
+  issues: write
+  pull-requests: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR link and triage
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const MAINTAINER = 'nisalgunawardhana';
+            const issue = context.payload.issue;
+            const body = issue.body || '';
+            const title = issue.title || '';
+
+            // Detect a submission issue robustly. The "submission" label is the
+            // primary signal, but if the label was not applied (e.g. it didn't
+            // exist when the issue was created) fall back to the form signature
+            // in the title/body so we never silently skip a real submission.
+            const labelNames = (issue.labels || []).map(l => (typeof l === 'string' ? l : l.name));
+            const isSubmission =
+              labelNames.includes('submission') ||
+              /\[submission\]/i.test(title) ||
+              /Pull Request Link/i.test(body) ||
+              /GitHub Username/i.test(body);
+
+            if (!isSubmission) {
+              console.log('Not a submission issue — skipping.');
+              return;
+            }
+
+            // Extract the PR link from the issue form body.
+            // GitHub issue forms render answers under their label heading.
+            const urlMatch = body.match(/https?:\/\/github\.com\/[^\s)]+\/pull\/\d+/i);
+            const prUrl = urlMatch ? urlMatch[0] : null;
+
+            const common = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+            };
+
+            async function setLabels(add, remove) {
+              for (const name of remove) {
+                try { await github.rest.issues.removeLabel({ ...common, name }); } catch (e) {}
+              }
+              if (add.length) {
+                await github.rest.issues.addLabels({ ...common, labels: add });
+              }
+            }
+
+            // --- No PR link found ---
+            if (!prUrl) {
+              await setLabels(['invalid-pr'], ['pending-submission']);
+              await github.rest.issues.createComment({
+                ...common,
+                body: [
+                  `👋 Thanks for your submission, @${issue.user.login}!`,
+                  ``,
+                  `❌ I could **not find a valid Pull Request link** in your issue.`,
+                  ``,
+                  `Your PR link must look like:`,
+                  `\`https://github.com/${context.repo.owner}/${context.repo.repo}/pull/123\``,
+                  ``,
+                  `👉 Please **edit this issue** and add the correct PR link. I'll re-check automatically.`,
+                ].join('\n'),
+              });
+              return;
+            }
+
+            // --- Parse owner/repo/number from the PR URL ---
+            const m = prUrl.match(/github\.com\/([^/]+)\/([^/]+)\/pull\/(\d+)/i);
+            const [, prOwner, prRepo, prNumberStr] = m;
+            const prNumber = parseInt(prNumberStr, 10);
+
+            // --- Verify the PR actually exists ---
+            let pr;
+            try {
+              const res = await github.rest.pulls.get({
+                owner: prOwner,
+                repo: prRepo,
+                pull_number: prNumber,
+              });
+              pr = res.data;
+            } catch (e) {
+              await setLabels(['invalid-pr'], ['pending-submission']);
+              await github.rest.issues.createComment({
+                ...common,
+                body: [
+                  `👋 @${issue.user.login}`,
+                  ``,
+                  `❌ The PR link you provided (\`${prUrl}\`) **does not point to an existing Pull Request**.`,
+                  ``,
+                  `👉 Please **edit this issue** and provide a valid PR link. I'll re-check automatically.`,
+                ].join('\n'),
+              });
+              return;
+            }
+
+            // --- Optional sanity check: PR should target THIS repo's main branch ---
+            const targetsThisRepo =
+              prOwner.toLowerCase() === context.repo.owner.toLowerCase() &&
+              prRepo.toLowerCase() === context.repo.repo.toLowerCase();
+            const targetsMain = pr.base && pr.base.ref === 'main';
+
+            if (!targetsThisRepo || !targetsMain) {
+              await setLabels(['invalid-pr'], ['pending-submission']);
+              await github.rest.issues.createComment({
+                ...common,
+                body: [
+                  `👋 @${issue.user.login}`,
+                  ``,
+                  `⚠️ Your PR was found, but it does **not target the course repo's \`main\` branch**.`,
+                  ``,
+                  `Your PR must target: **\`${context.repo.owner}/${context.repo.repo}\` → \`main\`**`,
+                  `(currently it targets: \`${prOwner}/${prRepo}\` → \`${pr.base ? pr.base.ref : '?'}\`)`,
+                  ``,
+                  `👉 Please re-open your PR against the correct base, update the link in this issue, and I'll re-check.`,
+                ].join('\n'),
+              });
+              return;
+            }
+
+            // --- Valid PR: assign to maintainer + label pending-submission ---
+            // Also ensure the "submission" label is present (the issue form may
+            // have failed to apply it if the label didn't exist at creation time).
+            await setLabels(['submission', 'pending-submission'], ['invalid-pr']);
+            try {
+              await github.rest.issues.addAssignees({ ...common, assignees: [MAINTAINER] });
+            } catch (e) {
+              console.log('Could not assign maintainer:', e.message);
+            }
+            await github.rest.issues.createComment({
+              ...common,
+              body: [
+                `✅ Thanks @${issue.user.login}! Your Pull Request link looks valid:`,
+                ``,
+                `🔗 ${prUrl}`,
+                ``,
+                `Your submission is now **pending review** by @${MAINTAINER}.`,
+                `Once it's reviewed and this issue is **closed by the maintainer**, you'll receive your 🏅 completion badge here automatically.`,
+              ].join('\n'),
+            });

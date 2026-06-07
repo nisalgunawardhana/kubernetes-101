@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 Submission Guidelines
+    url: https://github.com/nisalgunawardhana/Kubernetes-101/blob/main/SUBMISSION.md
+    about: Read the full step-by-step guide before submitting.

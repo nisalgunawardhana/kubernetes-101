@@ -1,0 +1,106 @@
+name: Award Badge
+
+on:
+  issues:
+    types: [closed]
+
+permissions:
+  issues: write
+
+jobs:
+  award:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Award badge if closed by maintainer
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const MAINTAINER = 'nisalgunawardhana';
+            const issue = context.payload.issue;
+
+            const common = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+            };
+
+            // 1. Must be a submission issue.
+            const labels = (issue.labels || []).map(l => (typeof l === 'string' ? l : l.name));
+            const isSubmission = labels.includes('submission') || labels.includes('pending-submission');
+            if (!isSubmission) {
+              console.log('Not a submission issue — skipping.');
+              return;
+            }
+
+            // 2. Must have been a valid, pending submission (not flagged invalid).
+            if (labels.includes('invalid-pr')) {
+              console.log('Issue has invalid-pr label — no badge awarded.');
+              return;
+            }
+
+            // 3. CRITICAL: only the maintainer may award a badge by closing.
+            const closedBy = context.payload.sender && context.payload.sender.login;
+            if (closedBy !== MAINTAINER) {
+              await github.rest.issues.createComment({
+                ...common,
+                body: [
+                  `ℹ️ This submission issue was closed by @${closedBy}, not by the maintainer (@${MAINTAINER}).`,
+                  ``,
+                  `🚫 **No badge has been awarded.** Only @${MAINTAINER} can approve submissions.`,
+                  `If this was closed by mistake, please **re-open** the issue.`,
+                ].join('\n'),
+              });
+              console.log(`Closed by ${closedBy}, not maintainer — no badge.`);
+              return;
+            }
+
+            // 4. Avoid double-awarding.
+            if (labels.includes('badge-awarded')) {
+              console.log('Badge already awarded — skipping.');
+              return;
+            }
+
+            const badgeUrl = `https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/main/images/badge.png`;
+            const badgeMarkdown = `![Kubernetes-101 Completed](${badgeUrl})`;
+
+            // 5. Update labels: mark awarded, drop pending.
+            try { await github.rest.issues.removeLabel({ ...common, name: 'pending-submission' }); } catch (e) {}
+            await github.rest.issues.addLabels({ ...common, labels: ['badge-awarded'] });
+
+            // 6. Comment the badge.
+            const repoUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}`;
+
+            const tweetText = encodeURIComponent(`I just completed the Kubernetes-101 course and earned my badge! 🎉☸️ Check it out: ${repoUrl} #Kubernetes #CloudNative #DevOps #100DaysOfCode`);
+            const twitterShareUrl = `https://twitter.com/intent/tweet?text=${tweetText}`;
+
+            const linkedInText = encodeURIComponent(`I just completed the Kubernetes-101 course and earned my completion badge! 🎉☸️\n\nCheck out the course: ${repoUrl}\n\n#Kubernetes #CloudNative #DevOps #Learning`);
+            const linkedInShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(repoUrl)}&summary=${linkedInText}`;
+
+            await github.rest.issues.createComment({
+              ...common,
+              body: [
+                `# 🎉 Congratulations, @${issue.user.login}!`,
+                ``,
+                `You have successfully completed the **Kubernetes-101** Main Task. Here is your official completion badge:`,
+                ``,
+                `<p align="center"><img src="${badgeUrl}" width="200" alt="Kubernetes-101 Completion Badge"></p>`,
+                ``,
+                `### 📋 Show it off`,
+                `Copy this into your README or profile:`,
+                ``,
+                '```markdown',
+                badgeMarkdown,
+                '```',
+                ``,
+                `### 📣 Share your achievement`,
+                `Let the world know — you earned it!`,
+                ``,
+                `| Platform | Link |`,
+                `|----------|------|`,
+                `| 🐦 X (Twitter) | [Tweet about it!](${twitterShareUrl}) |`,
+                `| 💼 LinkedIn | [Share on LinkedIn!](${linkedInShareUrl}) |`,
+                ``,
+                `Thanks for learning Kubernetes with us! ☸️🏅`,
+              ].join('\n'),
+            });
+            console.log('Badge awarded successfully.');
