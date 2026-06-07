@@ -4,7 +4,7 @@
 
 ---
 [![Follow me on GitHub](https://img.shields.io/github/followers/nisalgunawardhana?label=Follow&style=social)](https://github.com/nisalgunawardhana)
-[![Star this repo](https://img.shields.io/github/stars/nisalgunawardhana/kubernetes-101?style=social)](https://github.com/nisalgunawardhana/kubernetes-101/stargazers)
+[![Star this repo](https://img.shields.io/github/stars/nisalgunawardhana/Kubernetes-101?style=social)](https://github.com/nisalgunawardhana/kubernetes-101/stargazers)
 
 ---
 
