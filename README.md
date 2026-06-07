@@ -1,6 +1,14 @@
 # ☸️ Kubernetes-101
 
-> A hands-on, beginner-friendly guide to learning Kubernetes from zero to cluster management. Built for engineers who learn by doing.
+Welcome! This repo is a **free, hands-on Kubernetes course** built for developers who want to go from zero to confidently managing real clusters — no paid tools, no cloud account required.
+
+You'll learn Kubernetes by actually doing it: every lesson has a task, every concept is backed by a working example, and the course wraps up with a full end-to-end deployment challenge you can submit for a **completion badge**.
+
+> **What this repo is:** A structured, 12-lesson guided course covering Kubernetes architecture, deployments, scaling, updates, configuration, security, and cluster management — all running locally on your machine with Minikube.
+>
+> **Who it's for:** Backend engineers, DevOps beginners, or anyone who has heard of Kubernetes and wants to actually understand it by building things.
+>
+> **What you'll walk away with:** A working local cluster, a deployed sample app, and the confidence to read and write Kubernetes manifests from scratch.
 
 ---
 [![Follow me on GitHub](https://img.shields.io/badge/Follow-nisalgunawardhana-blue?logo=github&style=social)](https://github.com/nisalgunawardhana)
