@@ -5,8 +5,8 @@
 ---
 [![Follow me on GitHub](https://img.shields.io/github/followers/nisalgunawardhana?label=Follow&style=social)](https://github.com/nisalgunawardhana)
 [![Star this repo](https://img.shields.io/github/stars/nisalgunawardhana/kubernetes-101?style=social)](https://github.com/nisalgunawardhana/kubernetes-101/stargazers)
-## 📋 What You'll Learn
 
+---
 
 ## 🎯 What You'll Learn
 
@@ -218,4 +218,15 @@ Kubernetes-101/
 
 ---
 
-> Happy learning! ☸️ Star ⭐ this repo if it helped you.
+## 🌐 Connect with Me
+
+Follow me on social media for updates and more learning resources:
+
+[![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?logo=twitter&logoColor=white&style=for-the-badge)](https://twitter.com/thenisals)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?logo=linkedin&logoColor=white&style=for-the-badge)](https://linkedin.com/in/nisalgunawardhana)
+[![Instagram](https://img.shields.io/badge/Instagram-E4405F?logo=instagram&logoColor=white&style=for-the-badge)](https://instagram.com/thenisals)
+
+**Happy Learning! 🎉**
+
+Remember: Making mistakes is part of learning. Don't be afraid to experiment and try new things!
+
