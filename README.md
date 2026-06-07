@@ -3,7 +3,7 @@
 > A hands-on, beginner-friendly guide to learning Kubernetes from zero to cluster management. Built for engineers who learn by doing.
 
 ---
-[![Follow me on GitHub](https://img.shields.io/github/followers/nisalgunawardhana?label=Follow&style=social)](https://github.com/nisalgunawardhana)
+[![Follow me on GitHub](https://img.shields.io/badge/Follow-nisalgunawardhana-blue?logo=github&style=social)](https://github.com/nisalgunawardhana)
 [![Star this repo](https://img.shields.io/github/stars/nisalgunawardhana/Kubernetes-101?style=social)](https://github.com/nisalgunawardhana/kubernetes-101/stargazers)
 
 ---
